@@ -8,6 +8,7 @@ import { errorMonitor } from 'events';
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService) {}
+
   async signup(dto: AuthDto) {
     //Generate Password
     const hash = await argon.hash(dto.password);
@@ -33,7 +34,28 @@ export class AuthService {
     }
   }
 
-  async signin() {
+  async signin(dto: AuthDto) {
+    //Find the user by email
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    //If user does not exist throw exception
+    if (!user) {
+      throw new ForbiddenException('Credentials incorrect');
+    }
+    //compare passwords
+    const pwMatches = await argon.verify(user.hash, dto.password);
+    // if paasword no match, throw exception
+    if (!pwMatches) {
+      throw new ForbiddenException('Credentials incorrect');
+    }
+
+    //send back the user
+    delete user.hash;
+
+    return user;
     return { msg: 'Hello, I am signed in' };
   }
 }
