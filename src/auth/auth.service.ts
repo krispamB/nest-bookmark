@@ -28,7 +28,7 @@ export class AuthService {
       });
       delete user.hash;
       //return saves user
-      return user;
+      return this.signToken(user.id, user.email);
     } catch (error) {
       // Check if error is a prisma error and check if error code is a duplicate key error code(ie 'P2002'). If not throw error
       if (error instanceof PrismaClientKnownRequestError) {
