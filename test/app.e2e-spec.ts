@@ -4,6 +4,7 @@ import * as pactum from 'pactum';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module';
 import { AuthDto } from '../src/auth/dto';
+import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -122,6 +123,10 @@ describe('App e2e', () => {
   });
 
   describe('User', () => {
+    const dto: EditUserDto = {
+      firstname: 'Test',
+      lastname: 'User',
+    };
     describe('Get me', () => {
       it('should get current user', () => {
         return pactum
@@ -134,10 +139,33 @@ describe('App e2e', () => {
       });
     });
 
-    describe('Edit user', () => {});
+    describe('Edit user', () => {
+      it('should update user', () => {
+        return pactum
+          .spec()
+          .patch('/users')
+          .withHeaders({
+            Authorization: `Bearer $S{userAt}`,
+          })
+          .withBody(dto)
+          .expectStatus(200);
+      });
+    });
   });
 
   describe('Bookmark', () => {
+    describe('Get empty bookmarks', () => {
+      it('should get empty bookmarks', () => {
+        return pactum
+          .spec()
+          .get('/bookmark')
+          .withHeaders({
+            Authorization: `Bearer $S{userAt}`,
+          })
+          .expectStatus(200)
+        ;
+      });
+    });
     describe('Create bookmark', () => {});
 
     describe('Get bookmarks', () => {});
